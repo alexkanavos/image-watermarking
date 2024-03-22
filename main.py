@@ -1,6 +1,9 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog
 from PIL import Image, ImageTk
+import os
+
+os.environ["DISPLAY"] = ":0"
 
 
 class App(tk.Tk):
@@ -39,7 +42,9 @@ class Menu(ttk.Frame):
     def create_widgets(self):
 
         # Open Image Button
-        self.button_open = ttk.Button(self, text="Open Image")
+        self.button_open = ttk.Button(
+            self, text="Open Image", command=self.upload_image
+        )
         self.button_open.grid(row=0, column=0, columnspan=2, sticky="s")
 
         # Watermark
@@ -47,7 +52,6 @@ class Menu(ttk.Frame):
         self.watermark_label.grid(row=1, column=0, sticky="w")
 
         self.watermark_entry = ttk.Entry(self)
-        self.watermark_entry.insert(tk.END, "Watermark")
         self.watermark_entry.focus()
         self.watermark_entry.grid(row=1, column=1, sticky="we")
         self.watermark_entry.bind("<KeyRelease>", self.update_canvas_text)
@@ -102,6 +106,9 @@ class Menu(ttk.Frame):
         }
         self.master.image_area.place_text(current_entries)
 
+    def upload_image(self):
+        self.master.image_area.open_image()
+
 
 class ImageArea(tk.Canvas):
 
@@ -109,11 +116,17 @@ class ImageArea(tk.Canvas):
         super().__init__(parent)
         self.configure(background="black", bd=0, highlightthickness=0, relief="ridge")
 
-        self.image_original = Image.open("lofico_study_beach.jpg")
-        self.image_ratio = self.image_original.size[0] / self.image_original.size[1]
-        self.image_tk = ImageTk.PhotoImage(self.image_original)
-
         self.bind("<Configure>", self.show_full_image)
+
+    def open_image(self):
+        file_path = filedialog.askopenfilename(
+            filetypes=[("Image files", "*.png *.jpg *.jpeg *.gif")]
+        )
+        if file_path:
+            self.image_original = Image.open(file_path)
+            self.image_ratio = self.image_original.size[0] / self.image_original.size[1]
+            self.image_tk = ImageTk.PhotoImage(self.image_original)
+            self.show_full_image()
 
     def place_text(self, entries):
         self.delete("text")
