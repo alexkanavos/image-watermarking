@@ -3,8 +3,6 @@ from tkinter import ttk, filedialog
 from PIL import Image, ImageTk
 import os
 
-os.environ["DISPLAY"] = ":0"
-
 
 class App(tk.Tk):
 
@@ -115,7 +113,6 @@ class ImageArea(tk.Canvas):
     def __init__(self, parent):
         super().__init__(parent)
         self.configure(background="black", bd=0, highlightthickness=0, relief="ridge")
-
         self.bind("<Configure>", self.show_full_image)
 
     def open_image(self):
@@ -125,8 +122,27 @@ class ImageArea(tk.Canvas):
         if file_path:
             self.image_original = Image.open(file_path)
             self.image_ratio = self.image_original.size[0] / self.image_original.size[1]
-            self.image_tk = ImageTk.PhotoImage(self.image_original)
-            self.show_full_image()
+
+            self.show_full_image(event=None)
+
+    def show_full_image(self, event):
+
+        self.canvas_ratio = self.winfo_width() / self.winfo_height()
+        if self.canvas_ratio > self.image_ratio:
+            self.height = int(self.winfo_height())
+            self.width = int(self.winfo_height() * self.image_ratio)
+        else:
+            self.width = int(self.winfo_width())
+            self.height = int(self.winfo_width() / self.image_ratio)
+
+        self.resized_image = self.image_original.resize((self.width, self.height))
+        self.resized_tk = ImageTk.PhotoImage(self.resized_image)
+        self.create_image(
+            int(self.winfo_width() / 2),
+            int(self.winfo_height() / 2),
+            anchor="center",
+            image=self.resized_tk,
+        )
 
     def place_text(self, entries):
         self.delete("text")
@@ -138,27 +154,6 @@ class ImageArea(tk.Canvas):
             font=("Arial", entries["size"], "bold"),
             tags="text",
             fill="white",
-        )
-
-    def show_full_image(self, event):
-
-        # current canvas ratio
-        self.canvas_ratio = event.width / event.height
-
-        if self.canvas_ratio > self.image_ratio:
-            self.height = int(event.height)
-            self.width = int(self.height * self.image_ratio)
-        else:
-            self.width = int(event.width)
-            self.height = int(self.width / self.image_ratio)
-
-        self.resized_image = self.image_original.resize((self.width, self.height))
-        self.resized_tk = ImageTk.PhotoImage(self.resized_image)
-        self.create_image(
-            int(event.width / 2),
-            int(event.height / 2),
-            anchor="center",
-            image=self.resized_tk,
         )
 
 
