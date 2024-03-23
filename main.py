@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
 from PIL import Image, ImageTk
-import os
 
 
 class App(tk.Tk):
@@ -117,7 +116,8 @@ class ImageArea(tk.Canvas):
 
     def open_image(self):
         file_path = filedialog.askopenfilename(
-            filetypes=[("Image files", "*.png *.jpg *.jpeg *.gif")]
+            initialdir="/home/alex",
+            filetypes=[("Image files ", "*.png *.jpg *.jpeg *.gif")],
         )
         if file_path:
             self.image_original = Image.open(file_path)
