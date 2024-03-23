@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageGrab
 
 
 class WatermarkingApp(tk.Tk):
@@ -90,7 +90,9 @@ class Menu(ttk.Frame):
         self.y_position_entry.bind("<KeyRelease>", self.update_canvas_text)
 
         # Save Image Button
-        self.button_save = ttk.Button(self, text="Save Image")
+        self.button_save = ttk.Button(
+            self, text="Save Image", command=self.export_image
+        )
         self.button_save.grid(row=6, column=0, columnspan=2, sticky="n")
 
     def update_canvas_text(self, event):
@@ -105,6 +107,9 @@ class Menu(ttk.Frame):
 
     def upload_image(self):
         self.master.image_area.open_image()
+
+    def export_image(self):
+        self.master.image_area.save_image()
 
 
 class ImageArea(tk.Canvas):
@@ -124,6 +129,16 @@ class ImageArea(tk.Canvas):
             self.image_ratio = self.image_original.size[0] / self.image_original.size[1]
 
             self.show_full_image(event=None)
+
+    def save_image(self):
+
+        x0 = self.winfo_rootx()
+        y0 = self.winfo_rooty()
+        x1 = x0 + self.winfo_width()
+        y1 = y0 + self.winfo_height()
+
+        with ImageGrab.grab((x0, y0, x1, y1)) as image:
+            image.save("output.png")
 
     def show_full_image(self, event):
 
